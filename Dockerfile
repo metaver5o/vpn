@@ -31,6 +31,15 @@ RUN chmod 0755 /algo/algo-docker.sh
 # before userns becomes default
 # Note that not running as root will break if we don't have a matching userid
 # in the container. The filesystem has also been set up to assume root.
+
+
+# fixing alpine root vulnerability
+    USER root 
+    RUN pass=`cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w ${1:-32} | head -n 1` \ 
+        && echo 'root:${pass}' | chpasswd 
+    RUN sed -i '/root/s/sh/false/g' /etc/passwd
+#        && usermod -s /bin/false root
+
 USER root
 CMD [ "/algo/algo-docker.sh" ]
 ENTRYPOINT [ "/sbin/tini", "--" ]
